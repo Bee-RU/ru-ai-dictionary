@@ -1,0 +1,4 @@
+<button class="audio-btn" bindtap="onTap" disabled="{{loading}}">
+  <view wx:if="{{loading}}">⏳</view>
+  <view wx:else>🔊</view>
+</button>

@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "audio-button": "../../components/audio-button/audio-button",
+    "flashcard": "../../components/flashcard/flashcard"
+  }
+}

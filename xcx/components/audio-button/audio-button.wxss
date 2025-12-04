@@ -1,0 +1,2 @@
+.audio-btn { color: #4ECDC4; padding: 8rpx; border-radius: 9999rpx; }
+.audio-btn:active { opacity: 0.7; }

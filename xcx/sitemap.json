@@ -1,0 +1,10 @@
+{
+  "desc": "sitemap",
+  "rules": [
+    {
+      "regexp": ".*",
+      "priority": 1,
+      "action": "allow"
+    }
+  ]
+}

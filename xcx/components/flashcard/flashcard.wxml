@@ -1,0 +1,13 @@
+<view class="relative w-full h-48 perspective-1000" bindtap="onFlip">
+  <view class="relative w-full h-100 transform-style-3d" style="transition: transform 500ms; transform: {{isFlipped ? 'rotateY(180deg)' : 'none'}};">
+    <view class="absolute w-full h-100 backface-hidden bg-white rounded-3xl shadow-xl border-2 border-secondary flex-center p-6">
+      <image wx:if="{{entry.imageUrl}}" class="img" src="{{entry.imageUrl}}" mode="cover"></image>
+      <text class="term">{{entry.term}}</text>
+      <text class="hint">(Tap to flip)</text>
+    </view>
+    <view class="absolute w-full h-100 backface-hidden bg-primary text-white rounded-3xl shadow-xl flex-center p-6" style="transform: rotateY(180deg);">
+      <text class="explanation">{{entry.explanation}}</text>
+      <view class="quote"><text>"{{entry.examples[0].target}}"</text></view>
+    </view>
+  </view>
+</view>

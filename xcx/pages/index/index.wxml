@@ -1,0 +1,154 @@
+<view class="container bg-gray-50 shadow-2xl overflow-hidden relative">
+  <view class="header">
+    <view class="flex">
+      <view class="w-8 h-8 rounded-full bg-primary flex-center text-white font-bold">L</view>
+      <text class="font-display font-bold text-dark text-lg" style="margin-left:16rpx;">LingoPop</text>
+    </view>
+    <view class="flex gap-2">
+      <text class="text-xl border rounded-md p-1 bg-gray-50">{{nativeLang.flag}}</text>
+      <text class="text-gray-400">→</text>
+      <text class="text-xl border rounded-md p-1 bg-teal-50">{{targetLang.flag}}</text>
+    </view>
+  </view>
+
+  <scroll-view class="main no-scrollbar" scroll-y="true">
+    <view wx:if="{{!nativeLang.code || !targetLang.code}}" class="p-6">
+      <view class="bg-white rounded-3xl shadow-2xl p-6 text-center">
+        <text class="text-3xl font-display font-bold text-primary">LingoPop</text>
+        <text class="text-gray-500" style="display:block;margin-top:8rpx;">Choose your journey</text>
+        <view style="height:24rpx"></view>
+        <text class="text-sm font-bold text-gray-700" style="display:block;margin-bottom:8rpx;">I speak...</text>
+        <view class="lang-grid">
+          <block wx:for="{{languages}}" wx:key="code">
+            <button class="lang-btn" data-code="{{item.code}}" data-type="native" bindtap="onPickLang">{{item.flag}}</button>
+          </block>
+        </view>
+        <view style="height:24rpx"></view>
+        <text class="text-sm font-bold text-gray-700" style="display:block;margin-bottom:8rpx;">I want to learn...</text>
+        <view class="lang-grid">
+          <block wx:for="{{languages}}" wx:key="code">
+            <button class="lang-btn" data-code="{{item.code}}" data-type="target" bindtap="onPickLang">{{item.flag}}</button>
+          </block>
+        </view>
+        <button class="start-btn" bindtap="onStart" disabled="{{!nativeLang.code || !targetLang.code}}">Let's Go!</button>
+      </view>
+    </view>
+
+    <view wx:elif="{{view==='search'}}" class="p-4 space-y-6">
+      <form bindsubmit="onSearch" class="relative">
+        <input class="input" name="q" placeholder="Type in {{nativeLang.name}} or {{targetLang.name}}..." value="{{query}}" bindinput="onInput" />
+        <button formType="submit" class="search-btn" disabled="{{isLoading}}">{{isLoading? '...' : '🔍'}} </button>
+      </form>
+
+      <view wx:if="{{currentResult}}" class="space-y-6 pb-20">
+        <view class="bg-white rounded-3xl p-6 shadow-md border-b-4 border-gray-100 relative">
+          <view class="absolute" style="top:16rpx;right:16rpx;">
+            <button bindtap="onToggleSave">{{isSaved? '★' : '☆'}}</button>
+          </view>
+          <view wx:if="{{currentResult.imageUrl}}" class="img-wrap">
+            <image class="img-full" src="{{currentResult.imageUrl}}" mode="cover" />
+          </view>
+          <view class="title-row">
+            <text class="title">{{currentResult.term}}</text>
+            <audio-button text="{{currentResult.term}}" />
+          </view>
+          <text class="text-gray-500 font-medium text-lg" style="display:block;margin-top:8rpx;">{{currentResult.explanation}}</text>
+          <view class="space-y-3">
+            <block wx:for="{{currentResult.examples}}" wx:key="index">
+              <view class="ex-item">
+                <view class="ex-top">
+                  <text class="text-secondary font-semibold">{{item.target}}</text>
+                  <audio-button text="{{item.target}}" size="sm" />
+                </view>
+                <text class="text-gray-400 text-sm" style="display:block;margin-top:8rpx;">{{item.native}}</text>
+              </view>
+            </block>
+          </view>
+        </view>
+
+        <view class="fun-card">
+          <text class="fun-title">The Vibe Check</text>
+          <text class="fun-text">{{currentResult.funUsage}}</text>
+        </view>
+
+        <button wx:if="{{!chatOpen}}" class="ask-btn" bindtap="openChat">Ask AI 🧠</button>
+      </view>
+
+      <view wx:if="{{!currentResult && !isLoading}}" class="empty">
+        <text>Explore the world, one word at a time.</text>
+      </view>
+    </view>
+
+    <view wx:elif="{{view==='notebook'}}" class="p-4 space-y-6">
+      <text class="text-2xl font-display font-bold text-dark">My Collection ({{savedWords.length}})</text>
+      <view wx:if="{{savedWords.length===0}}" class="text-gray-400 text-center" style="margin-top:40rpx;">Nothing here yet. Go save some words!</view>
+      <view wx:else>
+        <view class="story-box">
+          <view class="story-top">
+            <text class="font-bold text-dark text-lg">AI Story Weaver</text>
+            <button class="story-btn" bindtap="onGenStory" disabled="{{isStoryLoading}}">{{isStoryLoading? 'Weaving...' : 'Create Story'}}</button>
+          </view>
+          <view wx:if="{{story}}" class="story-text">{{story}}</view>
+          <text wx:else class="text-xs text-gray-500">Combine your saved words into a fun memorable story.</text>
+        </view>
+        <view class="grid">
+          <block wx:for="{{savedWords}}" wx:key="id">
+            <view class="word-item">
+              <view>
+                <text class="word-term">{{item.term}}</text>
+                <text class="word-explain">{{item.explanation}}</text>
+              </view>
+              <view class="word-actions">
+                <audio-button text="{{item.term}}" size="sm" />
+                <button class="del" data-id="{{item.id}}" bindtap="onDeleteSaved">🗑️</button>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <view wx:elif="{{view==='learn'}}" class="p-4">
+      <view wx:if="{{savedWords.length>0}}" class="space-y-6">
+        <view class="text-center">
+          <text class="text-2xl font-bold font-display text-primary">Flashcards</text>
+          <text class="text-gray-400 text-sm" style="display:block;">Tap card to flip</text>
+        </view>
+        <flashcard entry="{{randomEntry}}" />
+        <view class="text-center" style="margin-top:32rpx;">
+          <button bindtap="onNextCard" class="text-gray-500">⟳ Next Card</button>
+        </view>
+      </view>
+      <view wx:else class="text-center text-gray-400">
+        <text>Save words to your notebook to start learning!</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{chatOpen && currentResult}}" class="chat-overlay">
+    <view class="chat-top">
+      <view>
+        <text class="font-bold text-dark">Chat about "{{currentResult.term}}"</text>
+        <text class="text-xs text-secondary" style="display:block;">Ask for synonyms, grammar...</text>
+      </view>
+      <button bindtap="closeChat" class="close">✖️</button>
+    </view>
+    <scroll-view scroll-y="true" class="chat-body">
+      <view class="msg left"><text>Hi! What do you want to know about "{{currentResult.term}}"?</text></view>
+      <block wx:for="{{chatHistory}}" wx:key="index">
+        <view class="msg {{item.role==='user' ? 'right' : 'left'}}"><text>{{item.text}}</text></view>
+      </block>
+      <view wx:if="{{isChatLoading}}" class="msg left"><text>...</text></view>
+    </scroll-view>
+    <form bindsubmit="onChatSubmit" class="chat-input">
+      <input name="msg" placeholder="Ask a question..." value="{{chatInput}}" bindinput="onChatInput" />
+      <button formType="submit" disabled="{{!chatInput.trim()}}" class="send">➡️</button>
+    </form>
+  </view>
+
+  <view class="nav">
+    <button bindtap="toSearch" class="nav-btn" style="color: {{view==='search' ? '#FF6B6B' : '#D1D5DB'}};">🔍\nSearch</button>
+    <button bindtap="toNotebook" class="nav-btn" style="color: {{view==='notebook' ? '#FF6B6B' : '#D1D5DB'}};">📖\nNotebook</button>
+    <button bindtap="toLearn" class="nav-btn" style="color: {{view==='learn' ? '#FF6B6B' : '#D1D5DB'}};">🧠\nLearn</button>
+  </view>
+</view>
